@@ -59,7 +59,7 @@ jobs:
 
       - name: Build code
         id: build
-        continue-on-error: ${{ env.enable_durability_measures }}
+        continue-on-error: ${{ env.enable_durability_measures && true || false }}
         run: zig build --verbose --summary all --color on
       - name: Build code fallback
         id: build_fallback
