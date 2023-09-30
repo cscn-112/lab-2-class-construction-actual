@@ -16,7 +16,6 @@ env:
 jobs:
   suite:
     name: C++ Build & Test
-    cancel-timeout-minutes: ${{ matrix.time_limit || 10 }}
     strategy:
       matrix:
         os:
@@ -50,12 +49,14 @@ jobs:
 
       - name: Set up Zig
         uses: goto-bus-stop/setup-zig@v2
+        timeout-minutes: ${{ matrix.time_limit || 10 }}
         with:
           version: 0.11.0
 
       # Where the magic happens :sparkle:
 
       - name: Build code
+        timeout-minutes: ${{ matrix.time_limit || 10 }}
         run: zig build --verbose --summary all --color on
       - name: Run main
         if: env.run_main
