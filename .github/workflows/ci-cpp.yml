@@ -45,7 +45,7 @@ jobs:
           path: |
             ${{ env.cwd }}/zig-out
             ${{ env.cwd }}/zig-cache
-          key: ${{ env.base-key }}-${{ env.cwd }}
+          key: ${{ env.base-key }}-${{ env.cwd }}-${{ github.ref }}
           restore-keys: ${{ env.base-key }}
 
       - name: Set up Zig
@@ -57,14 +57,14 @@ jobs:
 
       - name: Build code
         run: zig build --verbose --summary all --color on
+      - name: Run main
+        if: env.run_main
+        run: zig build run
       - name: Test code
         if: env.run_unit_tests
         run: zig test ${{ env.src_dir }} --color on
         env:
           src_dir: ${{ runner.os == 'Windows' && 'src/sanity_test.zig' || 'src/**.zig' }}
-      - name: Run main
-        if: env.run_main
-        run: zig build run
 
       - name: Upload build
         uses: actions/upload-artifact@v3

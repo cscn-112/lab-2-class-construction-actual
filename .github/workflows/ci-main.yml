@@ -8,6 +8,8 @@ env:
   cache-name: build-cache
 
 jobs:
+  # Zig & C++ build jobs
+
   zig_build:
     name: Zig Build
     env:
@@ -61,6 +63,8 @@ jobs:
             ${{ env.cwd }}/src
             ${{ env.cwd }}/zig-out
             ${{ env.cwd }}/README.md
+
+  # Rust build jobs
 
   rs_build:
     name: Rust Build
