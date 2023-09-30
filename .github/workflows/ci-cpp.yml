@@ -64,7 +64,7 @@ jobs:
       - name: Build code fallback
         id: build_fallback
         if: env.enable_durability_measures && steps.build.outcome == 'failure'
-        run: zig build-exe -lc++ --name main src/**.cpp --verbose --summary all --color on
+        run: zig build-exe -lc++ --name main src/**.cpp --summary all --color on
       - name: Run main
         if: env.run_main
         env:

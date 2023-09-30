@@ -20,6 +20,7 @@ pub fn build(b: *std.Build) void {
         // In this case the main source file is merely a path, however, in more
         // complicated build scripts, this could be a generated file.
         .root_source_file = .{ .path = "src/main.cpp" },
+        .main_pkg_path = .{ .path = "src" },
         .target = target,
         .optimize = optimize,
     });
