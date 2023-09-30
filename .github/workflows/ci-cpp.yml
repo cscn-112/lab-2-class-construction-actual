@@ -8,9 +8,11 @@ on:
 
 env:
   cwd: cpp
+
   run_main: true
   run_unit_tests: true
 
+  enable_durability_measures: true
   cache-name: build-cache
 
 jobs:
@@ -26,6 +28,7 @@ jobs:
             time_limit: 2
 
     runs-on: ${{ matrix.os }}
+    cancel-timeout-minutes: ${{ matrix.time_limit || 10 }}
     defaults:
       run:
         working-directory: ${{ env.cwd }}
@@ -44,23 +47,32 @@ jobs:
           path: |
             ${{ env.cwd }}/zig-out
             ${{ env.cwd }}/zig-cache
-          key: ${{ env.base-key }}-${{ env.cwd }}-${{ github.ref }}
+          key: ${{ env.base-key }}-${{ env.cwd }}-${{ github.head_ref }}
           restore-keys: ${{ env.base-key }}
 
       - name: Set up Zig
         uses: goto-bus-stop/setup-zig@v2
-        timeout-minutes: ${{ matrix.time_limit || 10 }}
         with:
           version: 0.11.0
 
       # Where the magic happens :sparkle:
 
       - name: Build code
-        timeout-minutes: ${{ matrix.time_limit || 10 }}
+        id: build
+        continue-on-error: ${{ env.enable_durability_measures }}
         run: zig build --verbose --summary all --color on
+      - name: Build code fallback
+        id: build_fallback
+        if: env.enable_durability_measures && steps.build.outcome == 'failure'
+        run: zig build-exe -lc++ --name main src/**.cpp --verbose --summary all --color on
       - name: Run main
         if: env.run_main
-        run: zig build run
+        env:
+          discriminant: ${{ !(env.enable_durability_measures && steps.build.outcome == 'failure') }}
+
+          build_arm: zig build run
+          fallback_arm: ./main
+        run: ${{ env.discriminant && env.build_arm || env.fallback_arm }}
       - name: Test code
         if: env.run_unit_tests
         run: zig test ${{ env.src_dir }} --color on
