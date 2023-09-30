@@ -8,6 +8,9 @@ on:
 
 env:
   cwd: cpp
+  run_main: true
+  run_unit_tests: true
+
   cache-name: build-cache
 
 jobs:
@@ -55,9 +58,13 @@ jobs:
       - name: Build code
         run: zig build --verbose --summary all --color on
       - name: Test code
+        if: env.run_unit_tests
         run: zig test ${{ env.src_dir }} --color on
         env:
           src_dir: ${{ runner.os == 'Windows' && 'src/sanity_test.zig' || 'src/**.zig' }}
+      - name: Run main
+        if: env.run_main
+        run: zig build run
 
       - name: Upload build
         uses: actions/upload-artifact@v3
