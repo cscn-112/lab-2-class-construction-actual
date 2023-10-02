@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Student.h"
+#include "lib/Student.h"
 
 int main()
 {

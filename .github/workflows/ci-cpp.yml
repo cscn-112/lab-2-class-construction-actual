@@ -57,22 +57,10 @@ jobs:
 
       # Where the magic happens :sparkle:
 
-      - name: Build code
-        id: build
-        continue-on-error: ${{ env.enable_durability_measures && true || false }}
-        run: zig build --verbose --summary all --color on
-      - name: Build code fallback
-        id: build_fallback
-        if: env.enable_durability_measures && steps.build.outcome == 'failure'
-        run: zig build-exe -lc++ --name main src/**.cpp --color on
-      - name: Run main
-        if: env.run_main
+      - name: Build code${{ env.run_main && ' and run it' || '' }}
         env:
-          discriminant: ${{ !(env.enable_durability_measures && steps.build.outcome == 'failure') }}
-
-          build_arm: zig build run
-          fallback_arm: ./main
-        run: ${{ env.discriminant && env.build_arm || env.fallback_arm }}
+          run_cmd: ${{ env.run_main && 'run' || '' }}
+        run: zig build ${{ env.run_cmd }} --verbose --summary all --color on
       - name: Test code
         if: env.run_unit_tests
         run: zig test ${{ env.src_dir }} --color on
