@@ -21,11 +21,14 @@ pub fn build(b: *std.Build) !void {
             } else false;
 
             if (include_file) {
-                var large_buffer: [100]u8 = undefined;
-                const large_buffer_slice = large_buffer[0..];
+                var path_vec = std.ArrayList(u8).init(b.allocator);
+                defer path_vec.deinit();
 
-                // we have to clone the path as walker.next() or walker.deinit() will override/kill it
-                const full_path = try std.fmt.bufPrint(large_buffer_slice, "{s}/{s}", .{ base_path, b.dupe(entry.path) });
+                try path_vec.appendSlice(base_path);
+                try path_vec.append('/');
+                try path_vec.appendSlice(entry.path);
+
+                const full_path = b.dupe(path_vec.items);
 
                 try sources.append(full_path);
             }
@@ -42,7 +45,7 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
     });
-    exe.addCSourceFiles(sources.items, &[_][]const u8{});
+    exe.addCSourceFiles(sources.items, &.{});
     exe.linkLibCpp();
     b.installArtifact(exe);
 
